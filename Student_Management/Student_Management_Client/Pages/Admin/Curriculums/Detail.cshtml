@@ -1,0 +1,148 @@
+﻿@page
+@model Student_Management_Client.Pages.Admin.Curriculums.DetailModel
+@{
+    Layout = "/Pages/Shared/_LayoutAdmin.cshtml";
+}
+
+
+<div class="row d-flex">
+
+    <div class="col-md-12">
+        <button type="button" class="btn btn-outline-success float-end" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            Add more
+        </button>
+
+    </div>
+   
+    <h2>@Model.CurriculumGetDTO.CurriculumName</h2>
+
+    <div class="col-12">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Subject Code</th>
+                    <th>Subject Name</th>
+                    <th>Term</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @{
+                    if (Model.SubjectCurriculumGetDTO == null)
+                    {
+                        <td>NotFound</td>
+                    }
+                    else
+                    {
+                            @foreach (var item in Model.SubjectCurriculumGetDTO)
+                        {
+                            <tr>
+                                <td>@item.Subject.SubjectCode</td>
+                                <td>@item.Subject.SubjectName</td>
+                                <td>@item.Subject.Term</td>
+
+                                <td><a class="btn btn-outline-primary">Update</a></td>
+                                <td asp-page="/Admin/Curriculums/Detail" asp-route-id="@item.CurriculumId"><a class="btn btn-outline-info">Detail</a></td>
+                            </tr>
+                        }
+                    }
+                }
+
+            </tbody>
+        </table>
+    </div>
+
+
+</div>
+
+
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Add more subjects</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="col-12">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Subject Name</th>
+                                <th>Subject Code</th>
+                                <th>Num of credit</th>
+                                <th>Subject Prequisite</th>
+                                <th>Major</th>
+                                <th>Term</th>
+                                <th>Status</th>
+                              
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @{
+                                if (Model.SubjectAvailable == null)
+                                {
+                                    <td>NotFound</td>
+                                }
+                                else
+                                {
+                                        <form method="post">
+                                                @foreach (var subject in Model.SubjectAvailable)
+                                            {
+                                                     <input value="@Model.CurriculumGetDTO.CurriculumId" name="CurriculumId" style="display:none;" />
+                                                    <tr>
+                                                        <td><input type="checkbox" value="@subject.SubjectId" name="SubjectIds" /></td>
+                                                        <td>@subject.SubjectName</td>
+                                                        <td>@subject.SubjectCode</td>
+                                                        <td>@subject.NumOfCredit</td>
+                                                        @{
+                                                             if (subject.SubjectPrequisiteNavigation == null)
+                                                             {
+                                                                    <td></td>
+                                                             }
+                                                             else
+                                                             {
+                                                                    <td>@subject.SubjectPrequisiteNavigation.SubjectName</td>
+                                                             }
+                                                        }
+                                                        <td>@subject.Major.MajorName</td>
+                                                        <td>@subject.Term</td>
+                                                        @{
+                                                             if (subject.Status == true)
+                                                             {
+                                                                    <td class="text-success">Active</td>
+                                                             }
+                                                            else
+                                                            {
+                                                                    <td class="text-danger">InActive</td>
+                                                            }
+                                                         }
+        
+                                                     </tr>
+                                            }
+                                              <button type="submit" class="btn btn-primary float-end">Save changes</button>
+                                              @{
+                                                  if(ViewData["error"] != null){
+                                                      <span class="text-danger">@ViewData["error"]</span>
+                                                  }
+                                              }
+                                        </form>
+                                }
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                
+            </div>
+        </div>
+    </div>
+</div>

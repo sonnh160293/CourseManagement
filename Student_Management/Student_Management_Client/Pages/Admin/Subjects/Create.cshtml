@@ -1,0 +1,132 @@
+﻿@page
+@model Student_Management_Client.Pages.Admin.Subjects.CreateModel
+@{
+    Layout = "/Pages/Shared/_LayoutAdmin.cshtml";
+    var majors = ViewData["MajorSelectList"] as SelectList;
+    var terms = ViewData["TermSelectList"] as SelectList;
+}
+<div class="row w-100">
+    <div class="col-12">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="@Model.CreateSubjectVM.SubjectName" class="control-label"></label>
+                <input asp-for="@Model.CreateSubjectVM.SubjectName" class="form-control" required/>
+                <span asp-validation-for="@Model.CreateSubjectVM.SubjectName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="@Model.CreateSubjectVM.SubjectCode" class="control-label"></label>
+                <input asp-for="@Model.CreateSubjectVM.SubjectCode" class="form-control" required />
+                <span asp-validation-for="@Model.CreateSubjectVM.SubjectCode" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="@Model.CreateSubjectVM.NumOfCredit" class="control-label"></label>
+                <input asp-for="@Model.CreateSubjectVM.NumOfCredit" class="form-control" required />
+                <span asp-validation-for="@Model.CreateSubjectVM.NumOfCredit" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="@Model.CreateSubjectVM.MajorId" class="control-label"></label>
+                <select asp-for="@Model.CreateSubjectVM.MajorId" class="form-control" asp-items="majors" id="majorIdSelect" required></select>
+                <span asp-validation-for="@Model.CreateSubjectVM.MajorId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="@Model.CreateSubjectVM.Term" class="control-label"></label>
+                <select asp-for="@Model.CreateSubjectVM.Term" class="form-control" asp-items="terms" id="termSelect" required></select>
+                <span asp-validation-for="@Model.CreateSubjectVM.Term" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="@Model.CreateSubjectVM.SubjectPrequisite" class="control-label"></label>
+                <select asp-for="@Model.CreateSubjectVM.SubjectPrequisite" class="form-control"  id="subjectPrequisiteSelect"></select>
+                <span asp-validation-for="@Model.CreateSubjectVM.SubjectPrequisite" class="text-danger"></span>
+            </div>
+
+           
+
+            <div class="form-group">
+                <label asp-for="@Model.CreateSubjectVM.Status" class="control-label"></label>
+                <select asp-for="@Model.CreateSubjectVM.Status" class="form-control" required>
+                    <option value="">Select Status</option>
+                    <option value="true">Active</option>
+                    <option value="false">InActive</option>
+                </select>
+                <span asp-validation-for="@Model.CreateSubjectVM.Status" class="text-danger"></span>
+            </div>
+
+
+
+
+            <button type="submit" class="btn btn-primary">Create</button>
+        </form>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-..." crossorigin="anonymous"></script>
+<script>
+    // Function to load Subject Prequisite options via AJAX
+    function loadSubjectPrequisites() {
+        var majorId = $('#majorIdSelect').val();
+        var term = $('#termSelect').val();
+
+        // Check if both majorId and term have a value
+        if (majorId && term) {
+            // Construct the API URL with parameters
+            var apiUrl = 'http://localhost:5172/api/Subject/GetSubjectsPrequisite?majord=' + majorId + '&term=' + term;
+
+            // Make AJAX call
+            $.ajax({
+                url: apiUrl,
+                type: 'GET',
+                success: function (data) {
+                    // Clear previous options
+                    $('#subjectPrequisiteSelect').empty();
+
+                    // Add 'Not chosen' option first
+                    $('#subjectPrequisiteSelect').append($('<option>', {
+                        value: 0,
+                        text: 'Not chosen'
+                    }));
+
+                    // Check if data is not null and not empty
+                    if (data && data.length > 0) {
+                        // Add new options
+                        $.each(data, function (index, item) {
+                            $('#subjectPrequisiteSelect').append($('<option>', {
+                                value: item.subjectId,
+                                text: item.subjectName
+                            }));
+                        });
+                    }
+                },
+              
+            });
+        }
+    }
+
+    // Event listener for change in MajorId select
+    $('#majorIdSelect').change(function () {
+        loadSubjectPrequisites();
+    });
+
+    // Event listener for change in Term select
+    $('#termSelect').change(function () {
+        var selectedTerm = $(this).val();
+
+        // Check if termSelect value is '1'
+        if (selectedTerm === '1') {
+            // Clear subjectPrequisiteSelect
+            $('#subjectPrequisiteSelect').empty();
+        } else {
+            // Load subject prequisites for selected majorId and term
+            loadSubjectPrequisites();
+        }
+    });
+
+        // Initial load: Do not call loadSubjectPrequisites() on page load
+        // Instead, rely on change event to trigger loading when both fields are selected
+</script>

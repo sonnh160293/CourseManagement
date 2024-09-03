@@ -1,0 +1,75 @@
+﻿@page
+@model Student_Management_Client.Pages.Admin.Curriculums.IndexModel
+@{
+    Layout = "/Pages/Shared/_LayoutAdmin.cshtml";
+    var majors = ViewData["MajorSelectList"] as SelectList;
+    
+}
+
+
+<div class="row d-flex">
+
+    <div class="col-md-12">
+        <a class="btn btn-outline-success float-end">Add new</a>
+    </div>
+    <div class="col-12">
+        <form method="get">
+            <div class="form-group">
+                <label for="MajorId">Major</label>
+                <select asp-for="MajorId" class="form-control" asp-items="majors"></select>
+            </div>
+           
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <button type="button" class="btn btn-secondary" onclick="resetForm()">Refresh</button>
+        </form>
+    </div>
+
+    <div class="col-12">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Curriculum Name</th>
+                    <th>Major</th>
+                    <th>Status</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @{
+                    if (Model.CurriculumGetDTOs == null)
+                    {
+                    <td>NotFound</td>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.CurriculumGetDTOs)
+                        {
+                        <tr>
+                            <td>@item.CurriculumName</td>
+                            <td>@item.Major.MajorName</td>
+                            <td>@item.Status</td>
+                              
+                            <td><a class="btn btn-outline-primary">Update</a></td>
+                            <td><a class="btn btn-outline-info" asp-page="/Admin/Curriculums/Detail" asp-route-id="@item.CurriculumId" >Detail</a></td>
+                        </tr>
+                        }
+                    }
+                }
+
+            </tbody>
+        </table>
+    </div>
+
+
+</div>
+
+
+<script>
+    function resetForm() {
+        document.getElementById('MajorId').value = 0;
+      
+       
+    }
+</script>

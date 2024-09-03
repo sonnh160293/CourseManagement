@@ -1,0 +1,60 @@
+﻿@page
+@model Student_Management_Client.Pages.Admin.Courses.ScheduleModel
+@{
+    Layout = "/Pages/Shared/_LayoutAdmin.cshtml";
+   
+}
+
+
+<div class="row d-flex">
+
+    <div class="col-md-12">
+       <h2>@Model.CourseGetDTO.CourseName - @Model.CourseGetDTO.Subject.SubjectName</h2>
+    </div>
+   
+
+    <div class="col-12">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Slot</th>
+                    <th>Date</th>
+                  
+                </tr>
+            </thead>
+
+            <tbody>
+                @{
+                    if (Model.CourseScheduleGetDTOs == null)
+                    {
+                    <td>NotFound</td>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.CourseScheduleGetDTOs)
+                        {
+                        <tr>
+                            <td>@item.SlotOfWeek.Slot.SlotId</td>
+                            <td>@item.Date.Value.ToString("dd/MM/yyyy")</td>
+                           
+
+                        </tr>
+                        }
+                    }
+                }
+
+            </tbody>
+        </table>
+    </div>
+
+
+</div>
+
+
+<script>
+    function resetForm() {
+        document.getElementById('SelectedMajorId').value = 0;
+        document.getElementById('SelectedSemester').value = 0;
+        document.getElementById('SelectedStatus').value = 0;
+    }
+</script>

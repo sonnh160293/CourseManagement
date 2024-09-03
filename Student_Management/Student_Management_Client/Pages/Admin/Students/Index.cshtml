@@ -1,0 +1,89 @@
+﻿@page
+@model Student_Management_Client.Pages.Admin.Students.IndexModel
+@{
+    Layout = "/Pages/Shared/_LayoutAdmin.cshtml";
+    var majors = ViewData["MajorSelectList"] as SelectList;
+    var terms = ViewData["TermSelectList"] as SelectList;
+}
+
+
+<div class="row d-flex">
+
+    <div class="col-md-12">
+        <a class="btn btn-outline-success float-end">Add new</a>
+    </div>
+    <div class="col-12">
+        <form method="get">
+            <div class="form-group">
+                <label for="SelectedMajorId">Major</label>
+                <select asp-for="SelectedMajorId" class="form-control" asp-items="majors"></select>
+            </div>
+            <div class="form-group">
+                <label for="SelectedTerm">Term</label>
+                <select asp-for="SelectedTerm" class="form-control" asp-items="terms"></select>
+            </div>
+            <div class="form-group">
+                <label for="SelectedName">Subject Name</label>
+                <input type="text" asp-for="SelectedCode" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <button type="button" class="btn btn-secondary" onclick="resetForm()">Refresh</button>
+        </form>
+    </div>
+
+    <div class="col-12">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Student Code</th>
+                    <th>Current Term</th>
+                    <th>Major</th>
+                    <th>Phone</th>
+                    <th>Curriculum</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @{
+                    if (Model.Students == null)
+                    {
+                    <td>NotFound</td>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.Students)
+                        {
+                        <tr>
+                            <td>@item.Name</td>
+                            <td>@item.StudentCode</td>
+                            <td>@item.CurrentTerm</td>
+                            <td>@item.Major.MajorName</td>
+                            <td>@item.Phone</td>
+                            <td>@item.Curriculum.CurriculumName</td>   
+                            <td><a class="btn btn-outline-primary">Update</a></td>
+                            <td><a class="btn btn-outline-info">Detail</a></td>
+                          
+
+                        </tr>
+                        }
+                    }
+                }
+
+            </tbody>
+        </table>
+    </div>
+
+    <a asp-page="/Admin/Index">a</a>
+</div>
+
+
+<script>
+    function resetForm() {
+        document.getElementById('SelectedMajorId').value = 0;
+        document.getElementById('SelectedTerm').value = 0;
+        document.getElementById('SelectedName').value = '';
+    }
+</script>

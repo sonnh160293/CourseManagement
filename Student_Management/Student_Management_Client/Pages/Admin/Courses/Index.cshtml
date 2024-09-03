@@ -1,0 +1,96 @@
+﻿@page
+@model Student_Management_Client.Pages.Admin.Courses.IndexModel
+@{
+    Layout = "/Pages/Shared/_LayoutAdmin.cshtml";
+    var majors = ViewData["MajorSelectList"] as SelectList;
+    var semesters = ViewData["SemesterSelectList"] as SelectList;
+    var statuses = ViewData["StatusSelectList"] as SelectList;
+}
+
+
+<div class="row d-flex">
+
+    <div class="col-md-12">
+        <a class="btn btn-outline-success float-end">Add new</a>
+    </div>
+    <div class="col-12">
+        <form method="get">
+            <div class="form-group">
+                <label for="SelectedMajorId">Major</label>
+                <select asp-for="SelectedMajorId" class="form-control" asp-items="majors"></select>
+            </div>
+            <div class="form-group">
+                <label for="SelectedSemester">Semester</label>
+                <select asp-for="SelectedSemester" class="form-control" asp-items="semesters"></select>
+            </div>
+            <div class="form-group">
+                <label for="SelectedStatus">Status</label>
+                <select asp-for="SelectedStatus" class="form-control" asp-items="statuses"></select>
+            </div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <button type="button" class="btn btn-secondary" onclick="resetForm()">Refresh</button>
+        </form>
+    </div>
+
+    <div class="col-12">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Course Name</th>
+                    <th>Subject</th>
+                    <th>Semester</th>
+                    <th>Teacher</th>
+                    <th>Status</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @{
+                    if (Model.Courses == null)
+                    {
+                    <td>NotFound</td>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.Courses)
+                        {
+                        <tr>
+                            <td>@item.CourseName</td>
+                            <td>@item.Subject.SubjectName - @item.Subject.SubjectCode</td>
+                            <td>@item.Semester.SemesterName - @item.Semester.Year</td>
+                            <td>@item.Teacher.Name</td>
+                            @{
+                                if(item.StatusNavigation == null){
+                                    <td></td>
+                                }else{
+                                    <td>@item.StatusNavigation.StatusName</td>
+                                }
+                            }
+                            
+                            <td><a class="btn btn-outline-primary" asp-page="/Admin/Courses/Schedule" asp-route-id="@item.CourseId">Schedule</a></td>
+                            <td><a class="btn btn-outline-info">Detail</a></td>
+                            <td><a class="btn btn-outline-info">Grade Detail</a></td>
+
+                        </tr>
+                        }
+                    }
+                }
+
+            </tbody>
+        </table>
+    </div>
+
+  
+</div>
+
+
+<script>
+    function resetForm() {
+        document.getElementById('SelectedMajorId').value = 0;
+        document.getElementById('SelectedSemester').value = 0;
+        document.getElementById('SelectedStatus').value = 0;
+    }
+</script>

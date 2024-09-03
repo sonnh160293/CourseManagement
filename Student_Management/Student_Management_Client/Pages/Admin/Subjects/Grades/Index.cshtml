@@ -1,0 +1,171 @@
+﻿@page
+@model Student_Management_Client.Pages.Admin.Subjects.Grades.IndexModel
+@{
+}
+
+@{
+    Layout = "/Pages/Shared/_LayoutAdmin.cshtml";
+    double? totalWeight = 0;
+    int i = 0;
+}
+
+<style>
+    .highlight {
+        background-color: yellow;
+        transition: background-color 0.7s ease-in-out;
+    }
+</style>
+
+<div class="row d-flex">
+    <h1>@Model.Subject.SubjectName - @Model.Subject.SubjectCode</h1>
+    <div class="col-md-12">
+        
+        <a id="update-btn" class="btn btn-outline-primary float-end">Update</a>
+    </div>
+
+    <form method="post">
+        <input type="hidden" value="@Model.Subject.SubjectId" name="SubjectId"/>
+        <div class="col-12">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Grade Category</th>
+                        <th>Grade Item</th>
+                        <th>Weight %</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        if (Model.GradesSubject == null)
+                        {
+                            <tr>
+                                <td colspan="3">NotFound</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            var displayedCategories = new HashSet<string>();
+                            foreach (var subject in Model.GradesSubject)
+                            {
+                                <tr>
+                                    <td>
+                                        @if (!displayedCategories.Contains(subject.GradeCategory.GradeCategoryName))
+                                        {
+                                            <input type="text" value="@subject.GradeCategory.GradeCategoryName" readonly class="form-control grade-category" />
+                                            displayedCategories.Add(subject.GradeCategory.GradeCategoryName);
+                                        }
+                                    </td>
+                                    <td>
+                                        <input type="text" value="@subject.GradeItem" name="GradeUpdateDTOs[@i].GradeItem" class="form-control grade-item" />
+                                        <input type="hidden" name="GradeUpdateDTOs[@i].Id" value="@subject.Id" />
+                                    </td>
+                                    <td>
+                                        <input type="text" value="@subject.Weight" readonly class="form-control grade-weight" name="GradeUpdateDTOs[@i].Weight" data-category="@subject.GradeCategory.GradeCategoryName" />
+                                        
+                                    </td>
+                                    
+                                </tr>
+                                @if(subject.GradeCategoryId != 6){
+                                    totalWeight += subject.Weight;
+                                }
+                                i = i + 1;
+                            }
+                        }
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2">Total</td>
+                        <td>
+                            <input type="text" id="total-weight" value="@totalWeight" readonly class="form-control" />
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <button type="submit" class="btn btn-outline-success float-end">Submit</button>
+        </form>
+</div>
+
+
+
+
+
+
+<script>
+    function calculateTotalWeight() {
+        var totalWeight = 0;
+        var gradeWeights = document.querySelectorAll('.grade-weight');
+
+        gradeWeights.forEach(function (input) {
+            var category = input.getAttribute('data-category');
+            if (category !== "Final Exam Resit") {
+                totalWeight += parseFloat(input.value) || 0;
+            }
+        });
+
+        document.getElementById('total-weight').value = totalWeight.toFixed(2);
+        return totalWeight; // Return total weight for validation
+    }
+
+    document.getElementById('update-btn').addEventListener('click', function () {
+        var gradeItems = document.querySelectorAll('.grade-item');
+        var gradeWeights = document.querySelectorAll('.grade-weight');
+
+        gradeItems.forEach(function (input) {
+            input.readOnly = !input.readOnly;
+             input.classList.add('highlight');
+        });
+
+        gradeWeights.forEach(function (input) {
+            var category = input.getAttribute('data-category');
+            if (category !== "Final Exam Resit") {
+                input.readOnly = !input.readOnly;
+                 input.classList.add('highlight');
+            }
+           
+        });
+
+        calculateTotalWeight();
+        // Remove highlight class after animation ends
+        setTimeout(function() {
+            document.querySelectorAll('.highlight').forEach(function(input) {
+                input.classList.remove('highlight');
+            });
+        }, 500);
+    });
+
+    // Calculate total weight whenever an input changes
+    document.querySelectorAll('.grade-weight').forEach(function (input) {
+        input.addEventListener('input', calculateTotalWeight);
+    });
+
+    // Initial calculation of total weight
+    calculateTotalWeight();
+
+    // Update Final Exam Resit when Final Exam changes
+    var finalExamInput = document.querySelector('.grade-weight[data-category="Final Exam"]');
+    var finalExamResitInput = document.querySelector('.grade-weight[data-category="Final Exam Resit"]');
+
+    if (finalExamInput && finalExamResitInput) {
+        finalExamInput.addEventListener('input', function () {
+            finalExamResitInput.value = finalExamInput.value;
+            calculateTotalWeight();
+        });
+    }
+
+    document.querySelector('form').addEventListener('submit', function (event) {
+        // Calculate total weight
+        var totalWeight = calculateTotalWeight();
+
+        // Check if total weight is not equal to 100
+        if (totalWeight !== 100) {
+            // Display an alert or message indicating the total weight must be 100
+            alert('Total weight must equal 100%. Please adjust the weights.');
+
+            // Prevent form submission
+            event.preventDefault();
+        }
+    });
+</script>

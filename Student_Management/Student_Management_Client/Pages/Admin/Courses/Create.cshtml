@@ -1,0 +1,318 @@
+﻿@page
+@model Student_Management_Client.Pages.Admin.Courses.CreateModel
+@{
+    Layout = "/Pages/Shared/_LayoutAdmin.cshtml";
+    var majors = ViewData["MajorSelectList"] as SelectList;
+    var terms = ViewData["TermSelectList"] as SelectList;
+    var semesters = ViewData["SemesterSelectList"] as SelectList;
+    var buildings = ViewData["BuildingSelectList"] as SelectList;
+    int i = 0;
+
+}
+<div class="row w-100">
+    <div class="col-12">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="@Model.CoursePost.CourseName" class="control-label"></label>
+                <input asp-for="@Model.CoursePost.CourseName" class="form-control" required />
+                <span asp-validation-for="@Model.CoursePost.CourseName" class="text-danger"></span>
+            </div>
+
+
+            <div class="form-group">
+                <label class="control-label">Major</label>
+                <select class="form-control" asp-items="majors" id="majorIdSelect" required></select>
+
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">Term</label>
+                <select class="form-control" asp-items="terms" id="termSelect" required></select>
+
+            </div>
+            <div class="form-group">
+                <label asp-for="@Model.CoursePost.TeacherId" class="control-label"></label>
+                <select asp-for="@Model.CoursePost.TeacherId" class="form-control" id="teacherSelect">
+                    <option value="0">All</option>
+                </select>
+                <span asp-validation-for="@Model.CoursePost.TeacherId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="@Model.CoursePost.SubjectId" class="control-label"></label>
+                <select asp-for="@Model.CoursePost.SubjectId" class="form-control" id="subjectPrequisiteSelect"></select>
+                <span asp-validation-for="@Model.CoursePost.SubjectId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">Buildings</label>
+                <select class="form-control" asp-items="buildings" id="buildingIdSelect" required>
+                    <option value="0">All</option>
+                </select>
+            </div>
+
+
+
+            <div class="form-group">
+                <label asp-for="RoomId" class="control-label"></label>
+                <select asp-for="RoomId" class="form-control" id="roomSelect">
+                    <option value="0">All</option>
+                </select>
+                <span asp-validation-for="RoomId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="@Model.CoursePost.Description" class="control-label"></label>
+                <input asp-for="@Model.CoursePost.Description" class="form-control" required />
+                <span asp-validation-for="@Model.CoursePost.Description" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="@Model.CoursePost.SlotPercentage" class="control-label"></label>
+                <input asp-for="@Model.CoursePost.SlotPercentage" class="form-control" required />
+                <span asp-validation-for="@Model.CoursePost.SlotPercentage" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="@Model.CoursePost.NumberOfStudent" class="control-label"></label>
+                <input asp-for="@Model.CoursePost.NumberOfStudent" class="form-control" required />
+                <span asp-validation-for="@Model.CoursePost.NumberOfStudent" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="@Model.CoursePost.SemesterId" class="control-label"></label>
+                <select asp-for="@Model.CoursePost.SemesterId" class="form-control" asp-items="semesters" required></select>
+                <span asp-validation-for="@Model.CoursePost.SemesterId" class="text-danger"></span>
+            </div>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Slot</th>
+                        @foreach (var day in Model.DayOfWeekDTOs)
+                        {
+                            <th>@day.DayOfWeek1</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var slot in Model.SlotGetDTOs)
+                    {
+                        <tr>
+                            <td>@slot.SlotName (@slot.FromHour - @slot.ToHour)</td>
+                            @foreach (var day in Model.DayOfWeekDTOs)
+                            {
+                                <td>
+                                    @{
+                                        var slotOfWeek = Model.SlotOfWeekDTOs.FirstOrDefault(s => s.SlotId == slot.SlotId && s.DayOfWeekId == day.Id);
+                                        if (slotOfWeek != null)
+                                        {
+                                            <input type="checkbox" name="SlotOfWeekSelected" id="checkbox-@slotOfWeek.SlotId-@day.Id" class="slot-checkbox" data-day="@day.Id" value="@slotOfWeek.Id" onclick="handleCheckboxClick(this)" />
+                                        }
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <button type="submit" class="btn btn-primary">Create</button>
+        </form>
+    </div>
+
+    
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-..." crossorigin="anonymous"></script>
+<script>
+    // Function to load Subject Prequisite options via AJAX
+    function loadSubjectPrequisites() {
+        var majorId = $('#majorIdSelect').val();
+        var term = $('#termSelect').val();
+
+        // Check if both majorId and term have a value
+        if (majorId && term) { 
+            
+            // Construct the API URL with parameters
+            var apiUrl = 'http://localhost:5172/api/Subject/?majord=' + majorId + '&term=' + term;
+
+            // Make AJAX call
+            $.ajax({
+                url: apiUrl,
+                type: 'GET',
+                success: function (data) {
+                    // Clear previous options
+                    $('#subjectPrequisiteSelect').empty();
+
+                  
+
+                    // Check if data is not null and not empty
+                    if (data && data.length > 0) {
+                        // Add new options
+                        $.each(data, function (index, item) {
+                            $('#subjectPrequisiteSelect').append($('<option>', {
+                                value: item.subjectId,
+                                text: item.subjectName
+                            }));
+                        });
+                    }
+                },
+
+            });
+
+            var apiTeacherUrl = 'http://localhost:5172/api/Teacher?majorId=' + majorId;
+            // Make AJAX call
+            $.ajax({
+                url: apiTeacherUrl,
+                type: 'GET',
+                success: function (data) {
+                    // Clear previous options
+                    $('#teacherSelect').empty();
+
+
+
+                    // Check if data is not null and not empty
+                    if (data && data.length > 0) {
+                        // Add new options
+                        $.each(data, function (index, item) {
+                            $('#teacherSelect').append($('<option>', {
+                                value: item.teacherId,
+                                text: item.name + " - " + item.teacherCode
+                            }));
+                        });
+                    }
+                },
+
+            });
+        }
+    }
+
+    // Event listener for change in MajorId select
+    $('#majorIdSelect').change(function () {
+        loadSubjectPrequisites();
+    });
+
+    // Event listener for change in Term select
+    $('#termSelect').change(function () {
+        loadSubjectPrequisites();
+    });
+
+            // Initial load: Do not call loadSubjectPrequisites() on page load
+            // Instead, rely on change event to trigger loading when both fields are selected
+</script>
+
+
+<script>
+    // Function to load Room options via AJAX
+    function loadRoom() {
+        var buildingId = $('#buildingIdSelect').val();
+
+        // Check if buildingId has a value
+        if (buildingId) {
+            // Construct the API URL with parameters
+            var apiUrl = 'http://localhost:5172/api/Room/' + buildingId;
+
+            // Make AJAX call
+            $.ajax({
+                url: apiUrl,
+                type: 'GET',
+                success: function (data) {
+                    // Clear previous options
+                    $('#roomSelect').empty();
+
+                    // Check if data is not null and not empty
+                    if (data && data.length > 0) {
+                        // Add new options
+                        $.each(data, function (index, item) {
+                            $('#roomSelect').append($('<option>', {
+                                value: item.roomId,
+                                text: item.roomName
+                            }));
+                        });
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error("Error fetching rooms: ", textStatus, errorThrown);
+                }
+            });
+        }
+    }
+
+    // Event listener for change in buildingId select
+    $('#buildingIdSelect').change(function () {
+        loadRoom();
+        
+    });
+
+    // Initial load: Call loadRoom() to load rooms based on the default value of buildingIdSelect
+    $(document).ready(function () {
+        loadRoom();
+    });
+
+
+</script>
+
+<script>
+    function handleCheckboxClick(checkbox) {
+        const maxSlots = 2;
+        const dayId = checkbox.getAttribute('data-day');
+        const checkboxes = document.querySelectorAll('.slot-checkbox');
+        const selectedCheckboxes = Array.from(checkboxes).filter(cb => cb.checked);
+
+        // Check for maximum checkboxes selected
+        if (selectedCheckboxes.length > maxSlots) {
+            alert(`You can select a maximum of ${maxSlots} slots.`);
+            checkbox.checked = false;
+            return;
+        }
+
+        // Check for maximum 1 slot per day
+        const dayCheckboxes = Array.from(checkboxes).filter(cb => cb.checked && cb.getAttribute('data-day') === dayId);
+        if (dayCheckboxes.length > 1) {
+            alert('You can select only one slot per day.');
+            checkbox.checked = false;
+        }
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        function fetchFreeSlots() {
+            var teacherId = $('#teacherSelect').val();
+            var roomId = $('#roomSelect').val();
+
+            if (teacherId && roomId) {
+                $.ajax({
+                    url: `http://localhost:5172/api/Course/FreeSlot`,
+                    type: 'GET',
+                    data: { teacherId: teacherId, roomId: roomId },
+                    success: function (data) {
+                        updateSlots(data);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error fetching free slots:", error);
+                    }
+                });
+            }
+        }
+
+        $('#teacherSelect, #roomSelect').change(fetchFreeSlots);
+
+        // Trigger the change event to fetch slots on page load
+        fetchFreeSlots();
+    });
+
+    function updateSlots(slots) {
+        // Disable all checkboxes initially
+        $('input.slot-checkbox').prop('checked', false).prop('disabled', true);
+
+        // Enable the checkboxes based on the free slots received from the API
+        slots.forEach(slot => {
+            var slotCheckboxId = `checkbox-${slot.slotId}-${slot.dayOfWeekId}`;
+            $(`#${slotCheckboxId}`).prop('disabled', false);
+        });
+    }
+   
+</script>
